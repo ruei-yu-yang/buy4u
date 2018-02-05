@@ -1,16 +1,20 @@
 package com.rueiyu.buy4u;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GroupDialogFragment.OnGroupNameListener {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,10 +33,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Cursor cursor = MyDBHelper.getInstance(this).getReadableDatabase()
-                .query("groups",null,null,null,null,null,null);
-        if(cursor.getCount() <=0){
-            // showGroupNameDialog();
+                .query("groups", null, null, null, null, null, null);
+        if (cursor.getCount() <= 0) {
+            showGroupNameDialog();
         }
+    }
+
+    private void showGroupNameDialog() {
+        GroupDialogFragment dialog = new GroupDialogFragment();
+        dialog.show(getFragmentManager(), "groupDialog");
     }
 
     @Override
@@ -55,5 +64,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void groupNameInputCompleted(String name) {
+        Log.d(TAG, "groupNameInputCompleted: " + name);
+        ContentValues values = new ContentValues();
+        values.put("name", name);
+        MyDBHelper.getInstance(this).getWritableDatabase().insert("groups", null, values);
     }
 }
