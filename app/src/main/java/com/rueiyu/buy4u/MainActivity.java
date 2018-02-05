@@ -3,6 +3,7 @@ package com.rueiyu.buy4u;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,20 +12,27 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements GroupDialogFragment.OnGroupNameListener {
+public class MainActivity extends AppCompatActivity implements GroupDialogFragment.OnGroupNameListener, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private List<Group> mGroups;
+    private int mGroupId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mGroupId = PreferenceManager.getDefaultSharedPreferences(this)
+                .getInt("group_id",0);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -58,15 +66,34 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         Spinner spinner = (Spinner) item.getActionView();
         Cursor cursor = MyDBHelper.getInstance(this).getReadableDatabase()
                 .query("groups",null,null,null,null,null,null,null);
-        List<String> names = new ArrayList<>();
-        while(cursor.moveToNext()){
+
+        int selectedIndex = 0;
+        mGroups = new ArrayList<>();
+        for(int i =0;i<cursor.getCount();i++){
+            cursor.moveToPosition(i);
             int id = cursor.getInt(cursor.getColumnIndex("_id"));
             String name = cursor.getString(cursor.getColumnIndex("name"));
-            names.add(name);
+            mGroups.add(new Group(id,name));
+            if(id == mGroupId){
+                selectedIndex = i;
+            }
         }
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,names);
+        ArrayAdapter<Group> adapter =
+                new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,mGroups);
         spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+        spinner.setSelection(selectedIndex);
+
+//        List<String> names = new ArrayList<>();
+//        while(cursor.moveToNext()){
+//            int id = cursor.getInt(cursor.getColumnIndex("_id"));
+//            String name = cursor.getString(cursor.getColumnIndex("name"));
+//            names.add(name);
+//        }
+//        ArrayAdapter<String> adapter =
+//                new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,names);
+//        spinner.setAdapter(adapter);
+
 
         return true;
     }
@@ -96,5 +123,18 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         ContentValues values = new ContentValues();
         values.put("name", name);
         MyDBHelper.getInstance(this).getWritableDatabase().insert("groups", null, values);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Log.d(TAG, "onItemSelected: " + position);
+        Group group = mGroups.get(position);
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit().putInt("group_id",group.getId()).apply();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
