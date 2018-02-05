@@ -1,5 +1,6 @@
 package com.rueiyu.buy4u;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -26,6 +27,12 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        Cursor cursor = MyDBHelper.getInstance(this).getReadableDatabase()
+                .query("groups",null,null,null,null,null,null);
+        if(cursor.getCount() <=0){
+            // showGroupNameDialog();
+        }
     }
 
     @Override
