@@ -11,6 +11,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements GroupDialogFragment.OnGroupNameListener {
 
@@ -48,6 +53,21 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        MenuItem item = menu.getItem(0);
+        Spinner spinner = (Spinner) item.getActionView();
+        Cursor cursor = MyDBHelper.getInstance(this).getReadableDatabase()
+                .query("groups",null,null,null,null,null,null,null);
+        List<String> names = new ArrayList<>();
+        while(cursor.moveToNext()){
+            int id = cursor.getInt(cursor.getColumnIndex("_id"));
+            String name = cursor.getString(cursor.getColumnIndex("name"));
+            names.add(name);
+        }
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,names);
+        spinner.setAdapter(adapter);
+
         return true;
     }
 
@@ -57,6 +77,10 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        if(id == R.id.action_add_group){
+            showGroupNameDialog();
+        }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
