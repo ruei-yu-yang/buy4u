@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
     private static final String TAG = MainActivity.class.getSimpleName();
     private List<Group> mGroups;
     private int mGroupId;
+    private Spinner mSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +64,12 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         MenuItem item = menu.getItem(0);
-        Spinner spinner = (Spinner) item.getActionView();
+        mSpinner = (Spinner) item.getActionView();
+        setupGroupSpinner();
+        return true;
+    }
+
+    private void setupGroupSpinner() {
         Cursor cursor = MyDBHelper.getInstance(this).getReadableDatabase()
                 .query("groups",null,null,null,null,null,null,null);
 
@@ -80,22 +86,9 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         }
         ArrayAdapter<Group> adapter =
                 new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,mGroups);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
-        spinner.setSelection(selectedIndex);
-
-//        List<String> names = new ArrayList<>();
-//        while(cursor.moveToNext()){
-//            int id = cursor.getInt(cursor.getColumnIndex("_id"));
-//            String name = cursor.getString(cursor.getColumnIndex("name"));
-//            names.add(name);
-//        }
-//        ArrayAdapter<String> adapter =
-//                new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,names);
-//        spinner.setAdapter(adapter);
-
-
-        return true;
+        mSpinner.setAdapter(adapter);
+        mSpinner.setOnItemSelectedListener(this);
+        mSpinner.setSelection(selectedIndex);
     }
 
     @Override
@@ -123,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         ContentValues values = new ContentValues();
         values.put("name", name);
         MyDBHelper.getInstance(this).getWritableDatabase().insert("groups", null, values);
+        setupGroupSpinner();
     }
 
     @Override
