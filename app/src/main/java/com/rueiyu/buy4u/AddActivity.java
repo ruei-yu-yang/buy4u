@@ -36,6 +36,7 @@ public class AddActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_add);
         Item item = new Item();
         item.setName("北海道巧克力");
+        item.setPrice(300);
         binding.setItem(item);
 
         findViews();
@@ -56,6 +57,7 @@ public class AddActivity extends AppCompatActivity {
         mBtnDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Log.d(TAG, "onClick: "+ binding.getItem());
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
                 final Item item = new Item();
                 item.setName(mName.getText().toString());

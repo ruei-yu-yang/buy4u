@@ -2,6 +2,7 @@ package com.rueiyu.buy4u;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverter;
 import android.arch.persistence.room.TypeConverters;
@@ -28,7 +29,41 @@ public class Item {
     private Date start;
     private Date end;
     private int price;
+    @Ignore
+    String priceString;
     private int qty;
+
+    public String getPriceString() {
+        if (price != 0) {
+            priceString = String.valueOf(price);
+        }
+        return priceString;
+    }
+
+    public void setPriceString(String priceString) {
+        this.priceString = priceString;
+        try {
+            price = Integer.parseInt(priceString);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            price = 0;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", groupId=" + groupId +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", photoPath='" + photoPath + '\'' +
+                ", start=" + start +
+                ", end=" + end +
+                ", price=" + price +
+                ", qty=" + qty +
+                '}';
+    }
 
     public int getId() {
         return id;

@@ -98,6 +98,7 @@
             android:layout_marginTop="8dp"
             android:ems="10"
             android:hint="Price"
+            android:text="@={item.priceString}"
             android:inputType="textPersonName"
             app:layout_constraintStart_toStartOf="@+id/start_date"
             app:layout_constraintTop_toBottomOf="@+id/start_date" />
