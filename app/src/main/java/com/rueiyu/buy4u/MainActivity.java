@@ -1,7 +1,9 @@
 package com.rueiyu.buy4u;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -31,6 +33,14 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Item> items = ItemDatabase.getDatabase(MainActivity.this).itemDao().getAll();
+                Log.d(TAG, "onCreate: " + items.size());
+            }
+        });
+
         mGroupId = PreferenceManager.getDefaultSharedPreferences(this)
                 .getInt("group_id",0);
 
@@ -41,8 +51,8 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(MainActivity.this,AddActivity.class);
+                startActivity(intent);
             }
         });
 

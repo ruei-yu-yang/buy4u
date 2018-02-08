@@ -1,11 +1,18 @@
 package com.rueiyu.buy4u;
 
+import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.rueiyu.buy4u.databinding.ActivityAddBinding;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class AddActivity extends AppCompatActivity {
 
@@ -19,11 +26,17 @@ public class AddActivity extends AppCompatActivity {
     private EditText mPrice;
     private EditText mQty;
     private EditText mName;
+    private ActivityAddBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_add);
+        Item item = new Item();
+        item.setName("北海道巧克力");
+        binding.setItem(item);
 
         findViews();
     }
@@ -39,5 +52,30 @@ public class AddActivity extends AppCompatActivity {
         mPrice = findViewById(R.id.price);
         mQty = findViewById(R.id.qty);
         mName = findViewById(R.id.name);
+
+        mBtnDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+                final Item item = new Item();
+                item.setName(mName.getText().toString());
+                try {
+                    item.setStart(sdf.parse(mStartDate.getText().toString()));
+                    item.setEnd(sdf.parse(mEndDate.getText().toString()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                item.setPrice(Integer.parseInt(mPrice.getText().toString()));
+                item.setQty(Integer.parseInt(mQty.getText().toString()));
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ItemDatabase.getDatabase(AddActivity.this)
+                                .itemDao().insert(item);
+                    }
+                }).start();
+            }
+        });
     }
 }
