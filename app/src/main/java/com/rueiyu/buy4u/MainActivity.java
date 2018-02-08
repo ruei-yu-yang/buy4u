@@ -9,7 +9,10 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -27,17 +30,32 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
     private List<Group> mGroups;
     private int mGroupId;
     private Spinner mSpinner;
+    private ItemRecyclerAdapter mAdapter;
+    private List<Item> mItems;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mRecyclerView = findViewById(R.id.recycler);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setupItemTouchHelper();
+
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                List<Item> items = ItemDatabase.getDatabase(MainActivity.this).itemDao().getAll();
-                Log.d(TAG, "onCreate: " + items.size());
+                mItems = ItemDatabase.getDatabase(MainActivity.this).itemDao().getAll();
+                Log.d(TAG, "onCreate: " + mItems.size());
+                mAdapter = new ItemRecyclerAdapter(mItems);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRecyclerView.setAdapter(mAdapter);
+                    }
+                });
             }
         });
 
@@ -61,6 +79,24 @@ public class MainActivity extends AppCompatActivity implements GroupDialogFragme
         if (cursor.getCount() <= 0) {
             showGroupNameDialog();
         }
+    }
+
+    private void setupItemTouchHelper() {
+        ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                mItems.remove(position);
+                mAdapter.notifyDataSetChanged();
+            }
+        };
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(mRecyclerView);
     }
 
     private void showGroupNameDialog() {
