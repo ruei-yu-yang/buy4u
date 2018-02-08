@@ -6,7 +6,10 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverter;
 import android.arch.persistence.room.TypeConverters;
+import android.text.TextUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static com.rueiyu.buy4u.Item.TABLE;
@@ -18,6 +21,7 @@ import static com.rueiyu.buy4u.Item.TABLE;
 @Entity(tableName = TABLE)
 @TypeConverters({DateTypeConverter.class})
 public class Item {
+    public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy/MM/dd");
     public static final String TABLE = "items";
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "_id")
@@ -27,6 +31,8 @@ public class Item {
     private String description;
     private String photoPath;
     private Date start;
+    @Ignore
+    private String startFormatted;
     private Date end;
     private int price;
     @Ignore
@@ -98,6 +104,17 @@ public class Item {
     }
 
     public Date getStart() {
+        if (start == null){
+            if (TextUtils.isEmpty(startFormatted)){
+                start = new Date();
+            }else{
+                try {
+                    start = SDF.parse(startFormatted);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         return start;
     }
 
@@ -135,5 +152,14 @@ public class Item {
 
     public void setPhotoPath(String photoPath) {
         this.photoPath = photoPath;
+    }
+
+    public String getStartFormatted() {
+        startFormatted = SDF.format(getStart());
+        return startFormatted;
+    }
+
+    public void setStartFormatted(String startFormatted) {
+        this.startFormatted = startFormatted;
     }
 }
